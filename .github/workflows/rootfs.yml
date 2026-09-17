@@ -31,7 +31,9 @@ jobs:
 
       - name: Install pmbootstrap
         run: |
-          pip install --user pmbootstrap
+          git clone --depth 1 https://gitlab.postmarketos.org/postmarketOS/pmbootstrap.git "$HOME/pmbootstrap"
+          mkdir -p "$HOME/.local/bin"
+          ln -s "$HOME/pmbootstrap/pmbootstrap.py" "$HOME/.local/bin/pmbootstrap"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
       - name: Arrange extra aports
