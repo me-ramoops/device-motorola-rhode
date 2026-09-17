@@ -1,0 +1,32 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify checksums
+        run: sha512sum -c sha512sums
+
+      - name: Check deviceinfo
+        run: |
+          set -a
+          . ./deviceinfo
+          set +a
+          test "$deviceinfo_codename" = "motorola-rhode"
+          test "$deviceinfo_arch" = "aarch64"
+          test "$deviceinfo_flash_method" = "fastboot"
+          test "$deviceinfo_generate_bootimg" = "true"
+          test -n "$deviceinfo_dtb"
+          test -n "$deviceinfo_getty"
+
+      - name: Check boot files
+        run: |
+          test -s kernel-cmdline.conf
+          test -s modules-initfs

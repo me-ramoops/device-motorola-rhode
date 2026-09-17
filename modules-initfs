@@ -1,0 +1,16 @@
+msm
+qcom_glink
+qcom_glink_rpm
+qcom_glink_smem
+phy_qcom_qmp_usb
+phy_qcom_snps_femto_v2
+dwc3_qcom
+ufs_qcom
+sdhci_msm
+i2c_qcom_geni
+spi_geni_qcom
+pinctrl_sm6225
+gcc_sm6225
+usb_f_rndis
+usb_f_acm
+u_ether

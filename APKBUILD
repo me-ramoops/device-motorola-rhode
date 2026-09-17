@@ -1,0 +1,36 @@
+# Reference: <https://postmarketos.org/devicepkg>
+maintainer="fwlta <monkeyfwlta@protonmail.com>"
+pkgname=device-motorola-rhode
+pkgdesc="Motorola Moto G52"
+pkgver=5
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-motorola-rhode
+	mkbootimg
+	postmarketos-base
+"
+
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	kernel-cmdline.conf
+	modules-initfs
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+a714d23e6e1fb977f29f5bab665903d45b3e78ba3774d6827d2a1d23e545369710bff6aa36e09d78193ffaad943789d7e6d474155871c8df62a779c3ecb42c8b  deviceinfo
+8e98c5cf3141379392fbccba21a8c069973d0539cf88063d1f465686a5af4cf5cf6e647115e3cba2e294b86eb4a7c6c02fe807095c63f85198e369b75d636461  kernel-cmdline.conf
+6a1f3c5f9507c3830198418188770759e4cace13ddc17b4246b256e9f8b2442e72b723c40cde8ecbc64966bf78868ab211d9cbfc0ad48281de00106377ede5ea  modules-initfs
+"
