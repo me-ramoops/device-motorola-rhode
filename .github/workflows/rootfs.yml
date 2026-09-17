@@ -1,0 +1,80 @@
+name: rootfs
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout device packaging
+        uses: actions/checkout@v4
+        with:
+          path: device
+
+      - name: Checkout kernel packaging
+        uses: actions/checkout@v4
+        with:
+          repository: monkeyfwlta/linux-motorola-rhode
+          path: kernel-pkg
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            git \
+            openssl \
+            python3-pip \
+            qemu-user-static
+
+      - name: Install pmbootstrap
+        run: |
+          pip install --user pmbootstrap
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Arrange extra aports
+        run: |
+          mkdir -p extra/device/testing/linux-motorola-rhode
+          mkdir -p extra/device/testing/device-motorola-rhode
+          cp kernel-pkg/APKBUILD kernel-pkg/config-*.aarch64 kernel-pkg/00*.patch \
+            extra/device/testing/linux-motorola-rhode/
+          cp device/APKBUILD device/deviceinfo device/kernel-cmdline.conf device/modules-initfs \
+            extra/device/testing/device-motorola-rhode/
+
+      - name: Configure pmbootstrap
+        run: |
+          mkdir -p ~/.config
+          cat > ~/.config/pmbootstrap.cfg <<'EOF'
+          [pmbootstrap]
+          device = motorola-rhode
+          hostname = rhode
+          locale = en_US.UTF-8
+          password = 147147
+          timezone = America/Sao_Paulo
+          ui = console
+          ui_extras = False
+          user = user
+          work = /home/runner/.local/var/pmbootstrap
+          EOF
+          yes '' | pmbootstrap --aports="$GITHUB_WORKSPACE/extra" init
+
+      - name: Install rootfs
+        run: |
+          pmbootstrap --aports="$GITHUB_WORKSPACE/extra" install --no-fde --no-firewall
+
+      - name: Show boot image
+        run: |
+          ls -la ~/.local/var/pmbootstrap/chroot_rootfs_motorola-rhode/boot/
+
+      - name: Upload boot image
+        uses: actions/upload-artifact@v4
+        with:
+          name: rhode-bootimg
+          path: ~/.local/var/pmbootstrap/chroot_rootfs_motorola-rhode/boot/boot.img
+
+      - name: Build log on failure
+        if: failure()
+        run: |
+          pmbootstrap log 2>/dev/null | tail -60 || true
