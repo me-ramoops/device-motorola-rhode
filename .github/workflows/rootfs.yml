@@ -36,14 +36,18 @@ jobs:
           ln -s "$HOME/pmbootstrap/pmbootstrap.py" "$HOME/.local/bin/pmbootstrap"
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
 
+      - name: Clone pmaports
+        run: |
+          git clone --depth 1 https://gitlab.postmarketos.org/postmarketOS/pmaports.git
+
       - name: Arrange extra aports
         run: |
-          mkdir -p extra/device/testing/linux-motorola-rhode
-          mkdir -p extra/device/testing/device-motorola-rhode
+          mkdir -p pmaports/device/testing/linux-motorola-rhode
+          mkdir -p pmaports/device/testing/device-motorola-rhode
           cp kernel-pkg/APKBUILD kernel-pkg/config-*.aarch64 kernel-pkg/00*.patch \
-            extra/device/testing/linux-motorola-rhode/
-          cp device/APKBUILD device/deviceinfo device/kernel-cmdline.conf device/modules-initfs \
-            extra/device/testing/device-motorola-rhode/
+            pmaports/device/testing/linux-motorola-rhode/
+          cp device/APKBUILD device/deviceinfo device/kernel-cmdline.conf device/modules-initfs device/sha512sums \
+            pmaports/device/testing/device-motorola-rhode/
 
       - name: Configure pmbootstrap
         run: |
@@ -60,11 +64,11 @@ jobs:
           user = user
           work = /home/runner/.local/var/pmbootstrap
           EOF
-          yes '' | pmbootstrap --aports="$GITHUB_WORKSPACE/extra" init
+          yes '' | pmbootstrap --aports="$GITHUB_WORKSPACE/pmaports" init
 
       - name: Install rootfs
         run: |
-          pmbootstrap --aports="$GITHUB_WORKSPACE/extra" install --no-fde --no-firewall
+          pmbootstrap --aports="$GITHUB_WORKSPACE/pmaports" install --no-fde --no-firewall
 
       - name: Show boot image
         run: |
